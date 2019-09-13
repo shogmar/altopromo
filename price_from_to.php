@@ -139,23 +139,14 @@ class Price_from_to extends Module
 
     public function hookDisplayFooter()
     {
-        $result = Db::getInstance()->executeS("SELECT price FROM "._DB_PREFIX_."product");
+        $result = Db::getInstance()->executeS("SELECT count(price) as count_price FROM "._DB_PREFIX_."product WHERE price >=".(float)Configuration::get('PriceFrom')." and price <=".(float)Configuration::get('PriceTo'));
 
-        $count_price = 0;
-        if (!empty($result)) {
-            $pr = array_column($result, 'price');
-            foreach ($pr as $val) {
-                if ((float)$val >= (float)Configuration::get('PriceFrom') and (float)$val <= (float)Configuration::get('PriceTo')) {
-                    $count_price++;
-                }
-            }
-        }
-
+        $count = !empty($result) ? $result[0]['count_price'] : 0;
         $this->context->smarty->assign([
             'from' => Configuration::get('PriceFrom'),
             'to' => Configuration::get('PriceTo'),
-            'count_price' => $count_price
-          ]);
+            'count_price' => $count
+        ]);
 
         return $this->display(__FILE__, 'footerhook.tpl');
     }
